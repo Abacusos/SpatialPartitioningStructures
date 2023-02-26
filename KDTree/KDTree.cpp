@@ -1,7 +1,7 @@
 ﻿#include "KDTree.h"
 
 #include <algorithm>
-#include <stack>
+#include <deque>
 #include <cassert>
 
 namespace sps {
@@ -22,11 +22,10 @@ namespace sps {
         return result;
     }
 
-    std::vector<V3f> KDTree::rangeSearch(const V3f& min, const V3f& max)
+    void KDTree::rangeSearch(const V3f& min, const V3f& max, std::vector<V3f>& result)
     {
-        std::vector<V3f> result;
         if (m_nodes.empty()) {
-            return result;
+            return;
         }
 
         auto getF32OnAxis = [](const V3f& data, Axis axis) {
@@ -45,12 +44,12 @@ namespace sps {
             u32 depth;
         };
 
-        std::stack<IndexWithDepth> nodesToBeChecked;
-        nodesToBeChecked.emplace(IndexWithDepth{ 0, 0 });
+        std::deque<IndexWithDepth> nodesToBeChecked;
+        nodesToBeChecked.push_back(IndexWithDepth{ 0, 0 });
 
         while (!nodesToBeChecked.empty()) {
-            auto [index, depth] = nodesToBeChecked.top();
-            nodesToBeChecked.pop();
+            auto [index, depth] = nodesToBeChecked.front();
+            nodesToBeChecked.pop_front();
 
             assert(index < m_nodes.size());
             const auto& node = m_nodes[index];
@@ -63,15 +62,13 @@ namespace sps {
 
             Axis axis = static_cast<Axis>(depth % static_cast<u32>(Axis::EnumMax));
             if (node.left != invalidIndex && getF32OnAxis(data, axis) >= getF32OnAxis(min, axis)) {
-                nodesToBeChecked.push(IndexWithDepth{ node.left, depth + 1 });
+                nodesToBeChecked.push_back(IndexWithDepth{ node.left, depth + 1 });
             }
 
             if (node.right != invalidIndex && getF32OnAxis(data, axis) <= getF32OnAxis(max, axis)) {
-                nodesToBeChecked.push(IndexWithDepth{ node.right, depth + 1 });
+                nodesToBeChecked.push_back(IndexWithDepth{ node.right, depth + 1 });
             }
         }
-
-        return result;
     }
 
     KDTree::NodeIndex KDTree::buildTreeLevel(std::vector<V3f> nodes, u32 depth)

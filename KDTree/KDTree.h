@@ -11,7 +11,7 @@ namespace sps {
 
         static KDTree buildTree(std::vector<V3f> points);
 
-        std::vector<V3f> rangeSearch(const V3f& min, const V3f& max);
+        void rangeSearch(const V3f& min, const V3f& max, std::vector<V3f>& result);
 
     private:
         

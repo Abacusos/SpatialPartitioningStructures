@@ -37,20 +37,23 @@ namespace sps {
         {
             sps::V3f outsideMin{ -1.0f, -1.0f, -1.0f };
             sps::V3f outsideMax{ -0.5f, -0.5f, -0.5f };
-            auto outside = tree.rangeSearch(outsideMin, outsideMax);
-            REQUIRE(outside.empty());
+            std::vector<sps::V3f> searchResult;
+            tree.rangeSearch(outsideMin, outsideMax, searchResult);
+            REQUIRE(searchResult.empty());
         }
         {
             sps::V3f completeMin{ -1.0f, -1.0f, -1.0f };
             sps::V3f completeMax{ 2.5f, 2.5f, 2.5f };
-            auto complete = tree.rangeSearch(completeMin, completeMax);
-            REQUIRE(complete.size() == 8);
+            std::vector<sps::V3f> searchResult;
+            tree.rangeSearch(completeMin, completeMax, searchResult);
+            REQUIRE(searchResult.size() == 8);
         }
         {
             sps::V3f halfMin{ -1.0f, -1.0f, -1.0f };
             sps::V3f halfMax{ 1.5f, 0.5f, 1.5f };
-            auto half = tree.rangeSearch(halfMin, halfMax);
-            REQUIRE(half.size() == 4);
+            std::vector<sps::V3f> searchResult;
+            tree.rangeSearch(halfMin, halfMax, searchResult);
+            REQUIRE(searchResult.size() == 4);
         }
     }
 
@@ -63,7 +66,8 @@ namespace sps {
 
         sps::V3f min{ -5000.0f, -5000.0f, -5000.0f };
         sps::V3f max{ 5000.0f, 5000.0f, 5000.0f };
-        auto searchResult = tree.rangeSearch(min, max);
+        std::vector<sps::V3f> searchResult;
+        tree.rangeSearch(min, max, searchResult);
 
         std::vector<V3f> expectedResult;
         expectedResult.reserve(pointCount / 2);
@@ -136,7 +140,9 @@ namespace sps {
         auto tree = KDTree::buildTree(data);
 
         meter.measure([&]() {
-            std::vector<V3f> expectedResult = tree.rangeSearch(min, max);
+            std::vector<V3f> expectedResult;
+            expectedResult.reserve(pointCount / 2);
+            tree.rangeSearch(min, max, expectedResult);
             });
     };
 
